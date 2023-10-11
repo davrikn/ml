@@ -1,0 +1,2 @@
+ID,Model,ModelParameters,TransformationParameters,Ensemble
+2d5562490272fd9a949cfa91c1deff77,SeasonalNaive,"{""method"": ""lastvalue"", ""lag_1"": 96, ""lag_2"": 2}","{""fillna"": ""time"", ""transformations"": {""0"": ""SeasonalDifference"", ""1"": ""SeasonalDifference""}, ""transformation_params"": {""0"": {""lag_1"": 12, ""method"": ""LastValue""}, ""1"": {""lag_1"": 2, ""method"": ""Median""}}}",0
