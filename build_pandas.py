@@ -15,10 +15,13 @@ def build_pandas(location: str):
         print("Overlap found")
 
     x_train = pd.concat([x_train_estimated, x_train_observed], join='outer').drop('date_calc', axis=1)
-    x_train = x_train.merge(train_targets[['date_forecast', 'pv_measurement']], on='date_forecast', how='inner')
+    #x_train = x_train.merge(train_targets[['date_forecast', 'pv_measurement']], on='date_forecast', how='inner')
     x_train.fillna(0, inplace=True)
-
     x_train['date_forecast'] = pd.to_datetime(x_train['date_forecast'])
     x_train.sort_values(by='date_forecast', inplace=True)
 
-    return x_train, train_targets, x_test_estimated
+    x_test_estimated.fillna(0, inplace=True)
+
+    x_train = pd.merge(x_train, train_targets, on='date_forecast', how='inner')
+
+    return x_train, x_test_estimated
