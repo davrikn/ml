@@ -37,12 +37,15 @@ def onehot_months(df):
     new_df['month'] = df['date_forecast'].dt.month
     # Perform one-hot encoding
     new_df = pd.get_dummies(new_df, columns=['month', ])
+    for i in range(12):
+        if not f'month_{i+1}' in new_df:
+            new_df[f'month_{i+1}'] = False 
     
     return new_df
 
 def onehot_hours(df):
     new_df = df.copy()
-    new_df['hour'] = df['date_forecast'].dt.hour
+    new_df['hour'] = df['date_forecast'].dt.hour        
     # Perform one-hot encoding
     new_df = pd.get_dummies(new_df, columns=['hour', ])
 
