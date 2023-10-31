@@ -124,6 +124,6 @@ def preprocess_category(category: str):
     merged_df.fillna(0, inplace=True)
 
 
-    return merged_df, preprocessed_test
+    return merged_df.reindex(sorted(merged_df.columns), axis=1), preprocessed_test.reindex(sorted(preprocessed_test.columns), axis=1)
 
 
