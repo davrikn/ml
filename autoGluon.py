@@ -20,6 +20,8 @@ def do_prediction(location, limit):
     train_data = TabularDataset(x_train)
 
     tuning_data = TabularDataset(tuning_data)
+    thirty_percent_index = int(len(tuning_data) * 0.4)
+    tuning_data = tuning_data.iloc[:thirty_percent_index]
 
     test_data = TabularDataset(x_test)
 
