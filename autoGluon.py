@@ -1,21 +1,26 @@
 from autogluon.tabular import TabularDataset, TabularPredictor
 import pandas as pd
 import ut
+import utils
 import numpy as np
 import random
 import string
 
 
-def do_prediction(location, time_limit):
-    x_train, x_test = ut.preprocess_category(location)
+def do_prediction(location, limit):
+    x_train, tuning_data, x_test = utils.preprocess_category(location)
     x_train.drop(["time"], axis=1, inplace=True)
+    tuning_data.drop(["time"], axis=1, inplace=True)
 
     x_train['date_forecast'] = pd.to_datetime(x_train['date_forecast'])
+    tuning_data['date_forecast'] = pd.to_datetime(tuning_data['date_forecast'])
 
     x_test.fillna(0, inplace=True)
 
     label = 'pv_measurement'
     train_data = TabularDataset(x_train)
+
+    tuning_data = TabularDataset(tuning_data)
 
     test_data = TabularDataset(x_test)
 
@@ -24,8 +29,8 @@ def do_prediction(location, time_limit):
                                  eval_metric='mean_absolute_error')
 
     predictor.fit(train_data,
-                  time_limit=time_limit,
-                  presets=['high_quality'])
+                  time_limit=limit,
+                  tuning_data=tuning_data, )
 
     y_pred = predictor.predict(test_data)
 
@@ -34,10 +39,11 @@ def do_prediction(location, time_limit):
     preds['date_forecast'] = x_test['date_forecast']
     preds['predicted'] = np.asarray(y_pred)
     random_string = ''.join(random.choice(string.ascii_letters) for _ in range(4))
-    preds.to_csv(location + str(time_limit) + random_string + '.csv')
+    preds.to_csv(str(limit) + random_string + '_' + location + '.csv')
+    print('Done with Location: ' + location + "================================================================")
 
 
-time_limit = 30 * 60
+time_limit = 1 * 60
 do_prediction('A', time_limit)
 do_prediction('B', time_limit)
 do_prediction('C', time_limit)

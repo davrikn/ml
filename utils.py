@@ -111,7 +111,7 @@ def clean_and_plot_target_data(target_df, zero_threshold=150, constant_value_thr
     return cleaned_target
 
 
-def preprocess_category(category: str):
+def preprocess_category_estimated_observed(category: str):
     category = category.upper()
 
     target_df = pd.read_parquet(f'data/{category}/train_targets.parquet')
@@ -155,5 +155,41 @@ def preprocess_category(category: str):
     estimated_target.fillna(0, inplace=True)
 
     return observed_target.reindex(sorted(observed_target.columns), axis=1), \
-        estimated_target.reindex(sorted(estimated_target.columns), axis=1), \
-        preprocessed_test.reindex(sorted(preprocessed_test.columns), axis=1)
+           estimated_target.reindex(sorted(estimated_target.columns), axis=1), \
+           preprocessed_test.reindex(sorted(preprocessed_test.columns), axis=1)
+
+
+def preprocess_category(category: str):
+    category = category.upper()
+
+    target_df = pd.read_parquet(f'data/{category}/train_targets.parquet')
+    estimated_df = pd.read_parquet(f'data/{category}/X_train_estimated.parquet')
+    observed_df = pd.read_parquet(f'data/{category}/X_train_observed.parquet')
+    test_df = pd.read_parquet(f'data/{category}/X_test_estimated.parquet')
+
+    cleaned_target = clean_and_plot_target_data(target_df=target_df)
+
+    preprocessed_df = concat_observed_estimated(observed_df, estimated_df)
+
+    preprocessed_df['date_forecast'] = pd.to_datetime(preprocessed_df['date_forecast'])
+    preprocessed_df.set_index('date_forecast', inplace=True)
+    preprocessed_df = preprocessed_df.resample('H').mean()
+    preprocessed_df = preprocessed_df.reset_index()
+
+    preprocessed_df = onehot_hours(preprocessed_df)
+    preprocessed_df = onehot_months(preprocessed_df)
+
+    # Test
+    test_df['date_forecast'] = pd.to_datetime(test_df['date_forecast'])
+    test_df.set_index('date_forecast', inplace=True)
+    test_df = test_df.resample('H').mean()
+    preprocessed_test = test_df.reset_index()
+
+    preprocessed_test = onehot_hours(preprocessed_test)
+    preprocessed_test = onehot_months(preprocessed_test)
+
+    preprocessed_df = merge_train_target(preprocessed_df, cleaned_target)
+    preprocessed_df.fillna(0, inplace=True)
+
+    return preprocessed_df.reindex(sorted(preprocessed_df.columns), axis=1), preprocessed_test.reindex(
+        sorted(preprocessed_test.columns), axis=1)
