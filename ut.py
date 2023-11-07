@@ -1,5 +1,5 @@
 import pandas as pd
-from sklearn.preprocessing import MinMaxScaler
+
 
 def interpolate_quarter_hourly(df):
     """
@@ -33,16 +33,18 @@ def interpolate_quarter_hourly(df):
 
     return df_interpolated
 
+
 def onehot_months(df):
     new_df = df.copy()
     new_df['month'] = df['date_forecast'].dt.month
     # Perform one-hot encoding
     new_df = pd.get_dummies(new_df, columns=['month', ])
     for i in range(12):
-        if not f'month_{i+1}' in new_df:
-            new_df[f'month_{i+1}'] = False
+        if not f'month_{i + 1}' in new_df:
+            new_df[f'month_{i + 1}'] = False
 
     return new_df
+
 
 def onehot_hours(df):
     new_df = df.copy()
@@ -52,13 +54,16 @@ def onehot_hours(df):
 
     return new_df
 
+
 def concat_observed_estimated(obs_df, est_df):
-    new_df = pd.concat([obs_df,est_df], ignore_index=True)
+    new_df = pd.concat([obs_df, est_df], ignore_index=True)
     return new_df
+
 
 def merge_train_target(train_df, target_df):
     merged_df = target_df.merge(train_df, left_on='time', right_on='date_forecast')
     return merged_df
+
 
 def clean_and_plot_target_data(target_df, zero_threshold=150, constant_value_threshold=1):
     """
@@ -79,10 +84,13 @@ def clean_and_plot_target_data(target_df, zero_threshold=150, constant_value_thr
     target_df = target_df.dropna(subset=['pv_measurement'])
 
     # Identify sequences of zeros in the target
-    zero_sequences = (target_df['pv_measurement'] == 0).astype(int).groupby(target_df['pv_measurement'].ne(0).cumsum()).cumsum()
+    zero_sequences = (target_df['pv_measurement'] == 0).astype(int).groupby(
+        target_df['pv_measurement'].ne(0).cumsum()).cumsum()
 
     # Identify sequences of constant non-zero values in the target
-    constant_sequences = (target_df['pv_measurement'].eq(target_df['pv_measurement'].shift()) & (target_df['pv_measurement'] != 0)).astype(int).groupby(target_df['pv_measurement'].ne(target_df['pv_measurement'].shift()).cumsum()).cumsum()
+    constant_sequences = (target_df['pv_measurement'].eq(target_df['pv_measurement'].shift()) & (
+            target_df['pv_measurement'] != 0)).astype(int).groupby(
+        target_df['pv_measurement'].ne(target_df['pv_measurement'].shift()).cumsum()).cumsum()
 
     # Mark rows to be removed
     remove_zeros = zero_sequences > zero_threshold
@@ -102,13 +110,9 @@ def clean_and_plot_target_data(target_df, zero_threshold=150, constant_value_thr
 
     return cleaned_target
 
+
 def preprocess_category(category: str):
     category = category.upper()
-
-    columns_to_keep = ['date_forecast', 'clear_sky_energy_1h:J', 'clear_sky_rad:W', 'dew_point_2m:K', 'direct_rad:W',
-                       'direct_rad_1h:J', 'effective_cloud_cover:p', 'precip_5min:mm',
-                       'relative_humidity_1000hPa:p', 'sun_azimuth:d', 'sun_elevation:d',
-                       't_1000hPa:K', 'total_cloud_cover:p', 'wind_speed_10m:ms', 'wind_speed_w_1000hPa:ms']
 
     target_df = pd.read_parquet(f'data/{category}/train_targets.parquet')
     estimated_df = pd.read_parquet(f'data/{category}/X_train_estimated.parquet')
@@ -118,30 +122,26 @@ def preprocess_category(category: str):
     cleaned_target = clean_and_plot_target_data(target_df=target_df)
 
     preprocessed_df = concat_observed_estimated(observed_df, estimated_df)
-    preprocessed_df = preprocessed_df[columns_to_keep]
 
-    numerical_cols = preprocessed_df.select_dtypes(include=['float64', 'int64']).columns
-    scaler = MinMaxScaler(feature_range=(0, 10))
-    preprocessed_df[numerical_cols] = scaler.fit_transform(preprocessed_df[numerical_cols])
+    preprocessed_df['date_forecast'] = pd.to_datetime(preprocessed_df['date_forecast'])
+    preprocessed_df.set_index('date_forecast', inplace=True)
+    preprocessed_df = preprocessed_df.resample('H').mean()
+    preprocessed_df = preprocessed_df.reset_index()
 
-    #preprocessed_df = onehot_hours(preprocessed_df)
-    #preprocessed_df = onehot_months(preprocessed_df)
+    preprocessed_df = onehot_hours(preprocessed_df)
+    preprocessed_df = onehot_months(preprocessed_df)
 
-    preprocessed_test = test_df[columns_to_keep]
+    # Test
+    test_df['date_forecast'] = pd.to_datetime(test_df['date_forecast'])
+    test_df.set_index('date_forecast', inplace=True)
+    test_df = test_df.resample('H').mean()
+    preprocessed_test = test_df.reset_index()
 
-    numerical_cols_test = preprocessed_test.select_dtypes(include=['float64', 'int64']).columns
-    scaler = MinMaxScaler(feature_range=(0, 10))
-    preprocessed_test[numerical_cols_test] = scaler.fit_transform(preprocessed_test[numerical_cols_test])
+    preprocessed_test = onehot_hours(preprocessed_test)
+    preprocessed_test = onehot_months(preprocessed_test)
 
-    #preprocessed_test = onehot_hours(preprocessed_test)
-    #preprocessed_test = onehot_months(preprocessed_test)
+    preprocessed_df = merge_train_target(preprocessed_df, cleaned_target)
+    preprocessed_df.fillna(0, inplace=True)
 
-    target_interpolated = interpolate_quarter_hourly(cleaned_target)
-
-    merged_df = merge_train_target(preprocessed_df, target_interpolated)
-    merged_df.fillna(0, inplace=True)
-
-
-    return merged_df.reindex(sorted(merged_df.columns), axis=1), preprocessed_test.reindex(sorted(preprocessed_test.columns), axis=1)
-
-
+    return preprocessed_df.reindex(sorted(preprocessed_df.columns), axis=1), preprocessed_test.reindex(
+        sorted(preprocessed_test.columns), axis=1)
