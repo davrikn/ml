@@ -1,2 +1,0 @@
-ID,Model,ModelParameters,TransformationParameters,Ensemble
-38e9b1512fe2b72222192d7413900663,AverageValueNaive,"{""method"": ""Weighted_Mean"", ""window"": null}","{""fillna"": ""zero"", ""transformations"": {""0"": ""ClipOutliers"", ""1"": ""QuantileTransformer"", ""2"": ""MaxAbsScaler""}, ""transformation_params"": {""0"": {""method"": ""clip"", ""std_threshold"": 3, ""fillna"": null}, ""1"": {""output_distribution"": ""uniform"", ""n_quantiles"": 1000}, ""2"": {}}}",0

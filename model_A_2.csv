@@ -1,2 +1,0 @@
-ID,Model,ModelParameters,TransformationParameters,Ensemble
-371257a9be69d1d41abb283ae91882f2,SeasonalityMotif,"{""window"": 10, ""point_method"": ""median"", ""distance_metric"": ""mse"", ""k"": 10, ""datepart_method"": ""recurring""}","{""fillna"": ""rolling_mean"", ""transformations"": {""0"": ""ClipOutliers""}, ""transformation_params"": {""0"": {""method"": ""clip"", ""std_threshold"": 4, ""fillna"": null}}}",0

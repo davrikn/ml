@@ -15,21 +15,20 @@ def dothing(location):
     x_test['date_forecast_dt'] = x_test['date_forecast']
     x_test['date_forecast'] = (pd.to_datetime(x_test['date_forecast'], format='%Y') - pd.to_datetime('2000', format='%Y')).dt.total_seconds()
 
-    print(x_train.columns)
     print(x_train.shape)
-    x_train.head()
+    print(x_train.head())
 
-    print(x_test.columns)
-    x_test.head()
+    print(x_test.head())
 
     h2o.init()
 
-    aml = H2OAutoML(max_models=20, seed=1, max_runtime_secs=400)
+    aml = H2OAutoML(max_models=20, seed=1, max_runtime_secs=300)
     aml.train(x=list(x_train.drop('pv_measurement', axis=1).columns), y='pv_measurement', training_frame=h2o.H2OFrame(x_train))
 
     lb = aml.leaderboard
     lb.head(rows=lb.nrows)
 
+    print('Leader:-----------------------------------------------------------   ')
     print(aml.leader)
 
     preds = aml.predict(h2o.H2OFrame(x_test))
@@ -39,7 +38,7 @@ def dothing(location):
     preds = pd.DataFrame()
     preds['date_forecast'] = x_test['date_forecast_dt']
     preds['predicted'] = np.asarray(y_pred)
-    preds.to_csv('h2o_predicted_' + location + '.csv', index=False)
+    preds.to_csv('h2o_normalized_with_OneHot' + location + '.csv', index=False)
 
 
 dothing('A')
