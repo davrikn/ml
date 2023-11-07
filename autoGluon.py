@@ -37,7 +37,7 @@ def do_prediction(location, limit):
     preds = pd.DataFrame()
     preds['date_forecast'] = x_test['date_forecast']
     preds['predicted'] = np.asarray(y_pred)
-    random_string = ''.join(random.choice(string.ascii_letters) for _ in range(4))
+    random_string = ''.join(random.choices(string.ascii_uppercase, k=4))
     preds.to_csv(str(limit) + random_string + '_' + location + '.csv')
     print('Done with Location: ' + location + "================================================================")
 
@@ -69,12 +69,12 @@ def do_prediction_no_tuning(location, limit):
     preds = pd.DataFrame()
     preds['date_forecast'] = x_test['date_forecast']
     preds['predicted'] = np.asarray(y_pred)
-    random_string = ''.join(random.choice(string.ascii_letters) for _ in range(4))
+    random_string = ''.join(random.choices(string.ascii_uppercase, k=4))
     preds.to_csv(str(limit) + random_string + '_' + location + '.csv')
     print('Done with Location: ' + location + "================================================================")
 
 
-time_limit = 1 * 60
+time_limit = 1 * 20
 do_prediction('A', time_limit)
 do_prediction('B', time_limit)
 do_prediction('C', time_limit)
