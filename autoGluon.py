@@ -74,7 +74,7 @@ def do_prediction_no_tuning(location, limit):
     print('Done with Location: ' + location + "================================================================")
 
 
-time_limit = 1 * 20
+time_limit = 45 * 60
 do_prediction('A', time_limit)
 do_prediction('B', time_limit)
 do_prediction('C', time_limit)
