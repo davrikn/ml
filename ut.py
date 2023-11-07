@@ -120,9 +120,9 @@ def preprocess_category(category: str):
     test_df = pd.read_parquet(f'data/{category}/X_test_estimated.parquet')
 
     cleaned_target = clean_and_plot_target_data(target_df=target_df)
-    
+
     preprocessed_df = concat_observed_estimated(observed_df, estimated_df)
-    
+
     preprocessed_df['date_forecast'] = pd.to_datetime(preprocessed_df['date_forecast'])
     preprocessed_df.set_index('date_forecast', inplace=True)
     preprocessed_df = preprocessed_df.resample('H').mean()
@@ -143,4 +143,5 @@ def preprocess_category(category: str):
     preprocessed_df = merge_train_target(preprocessed_df, cleaned_target)
     preprocessed_df.fillna(0, inplace=True)
 
-    return preprocessed_df.reindex(sorted(preprocessed_df.columns), axis=1), preprocessed_test.reindex(sorted(preprocessed_test.columns), axis=1)
+    return preprocessed_df.reindex(sorted(preprocessed_df.columns), axis=1), preprocessed_test.reindex(
+        sorted(preprocessed_test.columns), axis=1)
