@@ -15,10 +15,14 @@ def dothing(location):
     x_test['date_forecast_dt'] = x_test['date_forecast']
     x_test['date_forecast'] = (pd.to_datetime(x_test['date_forecast'], format='%Y') - pd.to_datetime('2000', format='%Y')).dt.total_seconds()
 
+    thirty_percent_index = int(len(tuning) * 0.4)
+    tuning_data = tuning.iloc[:thirty_percent_index]
+
     h2o.init()
 
-    aml = H2OAutoML(max_models=20, seed=1, max_runtime_secs=300)
-    aml.train(x=list(x_train.drop('pv_measurement', axis=1).columns), y='pv_measurement', training_frame=h2o.H2OFrame(x_train))
+    aml = H2OAutoML(max_models=20, seed=1, max_runtime_secs=1200)
+    aml.train(x=list(x_train.drop('pv_measurement', axis=1).columns), y='pv_measurement',
+              training_frame=h2o.H2OFrame(x_train))
 
     lb = aml.leaderboard
     lb.head(rows=lb.nrows)
