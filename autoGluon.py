@@ -27,9 +27,19 @@ def do_prediction(location, limit, name):
                                  path="AutoGluonTesting",
                                  eval_metric='mean_absolute_error')
 
+    num_trials = 20  # try at most 5 different hyperparameter configurations for each type of model
+    search_strategy = 'auto'  # to tune hyperparameters using random search routine with a local scheduler
+
+    hyperparameter_tune_kwargs = {  # HPO is not performed unless hyperparameter_tune_kwargs is specified
+        'num_trials': num_trials,
+        'scheduler': 'local',
+        'searcher': search_strategy,
+    }
+
     predictor.fit(train_data,
                   time_limit=limit,
-                  tuning_data=tuning_data, )
+                  tuning_data=tuning_data,
+                  hyperparameter_tune_kwargs=hyperparameter_tune_kwargs, )
 
     y_pred = predictor.predict(test_data)
 
@@ -42,8 +52,8 @@ def do_prediction(location, limit, name):
 
 
 if __name__ == '__main__':
-    name = "30min_per_location_with_tuning30"
-    time_limit = 30 * 60
+    name = "sec_tuning30_20HPO"
+    time_limit = 60 * 60
     do_prediction('A', time_limit, name)
     do_prediction('B', time_limit, name)
     do_prediction('C', time_limit, name)
