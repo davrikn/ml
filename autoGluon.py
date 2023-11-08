@@ -41,9 +41,9 @@ def do_prediction(location, limit, name):
     print('Done with Location: ' + location + "================================================================")
 
 
-if __name__ == '__main__':
-    name = "trying_notVM_"
-    time_limit = 5 * 60
+for i in range(4):
+    name = str(i) + "_many_runs_overnight_"
+    time_limit = 30 * 60
     do_prediction('A', time_limit, name)
     do_prediction('B', time_limit, name)
     do_prediction('C', time_limit, name)
