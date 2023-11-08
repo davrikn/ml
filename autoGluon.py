@@ -42,8 +42,8 @@ def do_prediction(location, limit, name):
 
 
 if __name__ == '__main__':
-    name = "trying_notVM_"
-    time_limit = 5 * 60
+    name = "30min_per_location_with_tuning30"
+    time_limit = 30 * 60
     do_prediction('A', time_limit, name)
     do_prediction('B', time_limit, name)
     do_prediction('C', time_limit, name)
