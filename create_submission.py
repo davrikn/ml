@@ -1,6 +1,6 @@
 import pandas as pd
 
-file_name = '180030min_per_location_with_tuning40_'
+file_name = '3600sec_40tuning_noHPO_'
 
 pred_a = pd.read_csv(file_name + 'A.csv')
 pred_a['date'] = pd.to_datetime(pred_a['date_forecast'])
