@@ -148,11 +148,14 @@ def preprocess_category_estimated_observed(category: str):
     preprocessed_test = onehot_hours(preprocessed_test)
     preprocessed_test = onehot_months(preprocessed_test)
 
+    # Elevation and snow drift are constant in train, so we drop them as they dont do anything for the predictions
     observed_target = merge_train_target(observed_df, cleaned_target)
     observed_target.fillna(0, inplace=True)
+    observed_target.drop(['elevation:m', 'snow_drift:idx'], axis=1, inplace=True)
 
     estimated_target = merge_train_target(estimated_df, cleaned_target)
     estimated_target.fillna(0, inplace=True)
+    estimated_target.drop(['elevation:m', 'snow_drift:idx'], axis=1, inplace=True)
 
     return observed_target.reindex(sorted(observed_target.columns), axis=1), \
            estimated_target.reindex(sorted(estimated_target.columns), axis=1), \
