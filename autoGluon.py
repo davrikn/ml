@@ -54,7 +54,7 @@ def do_prediction(location, limit, name, percentage):
 
 
 if __name__ == '__main__':
-    time_limit = 30 * 60
+    time_limit = 60 * 60
     percentage = 10 + 2 * 10
     name = str(1) + "_tuning_60HPO_"
     print('Starting run with percentage tuning= ' + str(percentage))
