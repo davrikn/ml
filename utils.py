@@ -157,6 +157,7 @@ def preprocess_category_estimated_observed(category: str):
     estimated_target.fillna(0, inplace=True)
     estimated_target.drop(['elevation:m', 'snow_drift:idx'], axis=1, inplace=True)
 
+    # Sort the columns alphabetically
     return observed_target.reindex(sorted(observed_target.columns), axis=1), \
            estimated_target.reindex(sorted(estimated_target.columns), axis=1), \
            preprocessed_test.reindex(sorted(preprocessed_test.columns), axis=1)
