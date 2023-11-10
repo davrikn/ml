@@ -118,6 +118,8 @@ def preprocess_category_estimated_observed(category: str):
     estimated_df = pd.read_parquet(f'data/{category}/X_train_estimated.parquet')
     observed_df = pd.read_parquet(f'data/{category}/X_train_observed.parquet')
     test_df = pd.read_parquet(f'data/{category}/X_test_estimated.parquet')
+    print(0)
+    print(len(test_df))
 
     cleaned_target = clean_and_plot_target_data(target_df=target_df)
 
@@ -143,11 +145,16 @@ def preprocess_category_estimated_observed(category: str):
     test_df['date_forecast'] = pd.to_datetime(test_df['date_forecast'])
     test_df.set_index('date_forecast', inplace=True)
     test_df = test_df.resample('H').mean()
+    print(1)
+    print(len(test_df))
     preprocessed_test = test_df.reset_index()
+    print(2)
+    print(len(preprocessed_test))
 
     preprocessed_test = onehot_hours(preprocessed_test)
     preprocessed_test = onehot_months(preprocessed_test)
-
+    print(3)
+    print(len(preprocessed_test))
     # Elevation and snow drift are constant in train, so we drop them as they dont do anything for the predictions
     observed_target = merge_train_target(observed_df, cleaned_target)
     observed_target.fillna(0, inplace=True)
