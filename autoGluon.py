@@ -28,7 +28,7 @@ def do_prediction(location, limit, name, percentage):
                                  path="AutoGluonTesting",
                                  eval_metric='mean_absolute_error')
 
-    num_trials = 60  # try at most 20 different hyperparameter configurations for each type of model
+    num_trials = 100  # try at most 20 different hyperparameter configurations for each type of model
     search_strategy = 'auto'  # to tune hyperparameters using random search routine with a local scheduler
 
     hyperparameter_tune_kwargs = {  # HPO is not performed unless hyperparameter_tune_kwargs is specified
@@ -54,8 +54,8 @@ def do_prediction(location, limit, name, percentage):
 
 
 if __name__ == '__main__':
-    time_limit = 60 * 60
-    percentage = 10 + 2 * 10
+    time_limit = 100 * 60
+    percentage = 30
     name = str(1) + "_tuning_60HPO_"
     print('Starting run with percentage tuning= ' + str(percentage))
     do_prediction('A', time_limit, name, percentage)
