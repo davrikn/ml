@@ -1,6 +1,6 @@
 import pandas as pd
 
-file_name = '1_tuning_20HPO__30_'
+file_name = '30tuning_HPO20__'
 
 pred_a = pd.read_csv(file_name + 'A.csv')
 pred_a['date'] = pd.to_datetime(pred_a['date_forecast'])
@@ -32,4 +32,4 @@ for val in pred_c['date']:
 submission['prediction'] = submission['prediction'].where(submission['prediction'] >= 0, 0)
 submission.index.name = "id"
 
-submission.to_csv('submission_' + file_name + 'attempt_2.csv')
+submission.to_csv('submission_' + file_name + 'attempt.csv')
