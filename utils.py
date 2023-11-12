@@ -111,6 +111,29 @@ def clean_and_plot_target_data(target_df, zero_threshold=150, constant_value_thr
     return cleaned_target
 
 
+def replace_missing_with_zero(df):
+    """
+    Replaces missing values (NaN, None, etc.) in a DataFrame with 0.
+
+    Parameters:
+    - df: The DataFrame to be processed.
+
+    Returns:
+    - df_cleaned: The DataFrame with missing values replaced by 0.
+    """
+    df = df.copy()
+    total_replaced = 0
+
+    for column in df.columns:
+        missing_count = df[column].isnull().sum()
+        if missing_count > 0:
+            total_replaced += missing_count
+            df[column].fillna(0, inplace=True)
+
+    print(f"Total values replaced: {total_replaced}")
+
+    return df
+
 def preprocess_category_estimated_observed(category: str):
     category = category.upper()
 
@@ -118,56 +141,20 @@ def preprocess_category_estimated_observed(category: str):
     estimated_df = pd.read_parquet(f'data/{category}/X_train_estimated.parquet')
     observed_df = pd.read_parquet(f'data/{category}/X_train_observed.parquet')
     test_df = pd.read_parquet(f'data/{category}/X_test_estimated.parquet')
-    print(0)
-    print(len(test_df))
 
     cleaned_target = clean_and_plot_target_data(target_df=target_df)
 
-    # Observed
-    observed_df['date_forecast'] = pd.to_datetime(observed_df['date_forecast'])
-    observed_df.set_index('date_forecast', inplace=True)
-    observed_df = observed_df.resample('H').mean()
-    observed_df = observed_df.reset_index()
+    preprocessed_test = test_df
+    target_interpolated = cleaned_target
 
-    observed_df = onehot_hours(observed_df)
-    observed_df = onehot_months(observed_df)
+    merged_df = merge_train_target(observed_df, target_interpolated)
+    merged_df = replace_missing_with_zero(merged_df)
 
-    # Estimated
-    estimated_df['date_forecast'] = pd.to_datetime(estimated_df['date_forecast'])
-    estimated_df.set_index('date_forecast', inplace=True)
-    estimated_df = estimated_df.resample('H').mean()
-    estimated_df = estimated_df.reset_index()
+    estimated_df = merge_train_target(estimated_df, target_interpolated)
+    estimated_df = replace_missing_with_zero(estimated_df)
 
-    estimated_df = onehot_hours(estimated_df)
-    estimated_df = onehot_months(estimated_df)
-
-    # Test
-    test_df['date_forecast'] = pd.to_datetime(test_df['date_forecast'])
-    test_df.set_index('date_forecast', inplace=True)
-    test_df = test_df.resample('H').mean()
-    print(1)
-    print(len(test_df))
-    preprocessed_test = test_df.reset_index()
-    print(2)
-    print(len(preprocessed_test))
-
-    preprocessed_test = onehot_hours(preprocessed_test)
-    preprocessed_test = onehot_months(preprocessed_test)
-    print(3)
-    print(len(preprocessed_test))
-    # Elevation and snow drift are constant in train, so we drop them as they dont do anything for the predictions
-    observed_target = merge_train_target(observed_df, cleaned_target)
-    observed_target.fillna(0, inplace=True)
-    observed_target.drop(['elevation:m', 'snow_drift:idx'], axis=1, inplace=True)
-
-    estimated_target = merge_train_target(estimated_df, cleaned_target)
-    estimated_target.fillna(0, inplace=True)
-    estimated_target.drop(['elevation:m', 'snow_drift:idx'], axis=1, inplace=True)
-
-    # Sort the columns alphabetically
-    return observed_target.reindex(sorted(observed_target.columns), axis=1), \
-           estimated_target.reindex(sorted(estimated_target.columns), axis=1), \
-           preprocessed_test.reindex(sorted(preprocessed_test.columns), axis=1)
+    return merged_df.reindex(sorted(merged_df.columns), axis=1), preprocessed_test.reindex(
+        sorted(preprocessed_test.columns), axis=1), estimated_df.reindex(sorted(estimated_df.columns), axis=1)
 
 
 def preprocess_category(category: str):
